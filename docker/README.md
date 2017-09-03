@@ -21,7 +21,6 @@ install docker-ce from [here](https://docs.docker.com/engine/installation/linux/
 
 Base for docker file was taken from [here](https://github.com/osrf/docker_images/blob/7ba58fc107b368d6409c22161070eb93e562f240/ros/kinetic/ubuntu/xenial/desktop-full/Dockerfile)
 
-# build docker image
 ```
  # clone this repository
  git clone https://github.com/parilo/CarND-Capstone.git
