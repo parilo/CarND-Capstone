@@ -12,7 +12,7 @@ Install Docker-CE from [here](https://docs.docker.com/engine/installation/linux/
 
  sudo apt-get install docker-ce=17.06.0~ce-0~ubuntu
 
- # add yourself tothe docker group and relogin
+ # add yourself to the docker group and relogin
  sudo usermod -a -G docker username
 ```
 
