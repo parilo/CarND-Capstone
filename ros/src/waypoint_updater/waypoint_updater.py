@@ -73,16 +73,6 @@ class WaypointUpdater(object):
                 car_pos,
                 self.base_waypoints.waypoints[i].pose.pose.position
             )
-            # print('i: {} p: {} n: {}'.format(i, prev_dist, next_dist))
-            # print('i: {} x: {} y: {} z: {}   v: x: {} y: {} z: {}'.format(
-            #     i,
-            #     self.base_waypoints.waypoints[i].pose.pose.position.x,
-            #     self.base_waypoints.waypoints[i].pose.pose.position.y,
-            #     self.base_waypoints.waypoints[i].pose.pose.position.z,
-            #     self.base_waypoints.waypoints[i].twist.twist.linear.x,
-            #     self.base_waypoints.waypoints[i].twist.twist.linear.y,
-            #     self.base_waypoints.waypoints[i].twist.twist.linear.z,
-            # ))
             if next_dist > prev_dist:
                 break
             self.current_waypoints_index = i
@@ -93,27 +83,6 @@ class WaypointUpdater(object):
         final_waypoints.header.stamp = rospy.Time(0)
         final_waypoints_end_index = min(self.current_waypoints_index + LOOKAHEAD_WPS + 1, len(self.base_waypoints.waypoints))
         final_waypoints.waypoints = self.base_waypoints.waypoints[self.current_waypoints_index + 2:final_waypoints_end_index]
-
-        # for wp in final_waypoints.waypoints:
-        #     wp.twist.twist.linear.x = 10
-
-        # wp_pos = final_waypoints.waypoints[0].pose.pose.position
-        # print('i: {} x: {} y: {} z: {} - wp: x: {} y: {} z: {}   v: x: {} y: {} z: {}'.format(
-        #     self.current_waypoints_index,
-        #     car_pos.x,
-        #     car_pos.y,
-        #     car_pos.z,
-        #     wp_pos.x,
-        #     wp_pos.y,
-        #     wp_pos.z,
-        #     final_waypoints.waypoints[0].twist.twist.linear.x,
-        #     final_waypoints.waypoints[0].twist.twist.linear.y,
-        #     final_waypoints.waypoints[0].twist.twist.linear.z,
-        # ))
-        #
-        # print ('---------------------------------')
-        # print (msg)
-        # print (final_waypoints.waypoints[0])
 
         self.final_waypoints_pub.publish(final_waypoints)
 
