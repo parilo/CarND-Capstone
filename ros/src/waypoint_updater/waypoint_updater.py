@@ -23,6 +23,15 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 
+def dist(a, b):
+    """
+    Distance between two points
+
+    Args:
+        a (geometry_msgs/Point): first point
+        b (geometry_msgs/Point): second point
+    """
+    return math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -37,16 +46,82 @@ class WaypointUpdater(object):
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        self.base_waypoints = None
+        self.current_waypoints_index = 0
 
         rospy.spin()
 
     def pose_cb(self, msg):
-        # TODO: Implement
-        pass
+
+        # need to determine nearest waypoint and store it index
+        # we assume that we going through waypoints continousely
+        # and waypoints don't change, so we cache current waypoint and search
+        # from current position onwards.
+
+        # return if we at the end of the path
+        if self.current_waypoints_index == len(self.base_waypoints.waypoints) - 1:
+            return
+
+        car_pos =  msg.pose.position
+        car_pos.z = 0
+        prev_dist = dist (
+            car_pos,
+            self.base_waypoints.waypoints[self.current_waypoints_index].pose.pose.position
+        )
+        for i in range(self.current_waypoints_index + 1, len(self.base_waypoints.waypoints)):
+            next_dist = dist (
+                car_pos,
+                self.base_waypoints.waypoints[i].pose.pose.position
+            )
+            # print('i: {} p: {} n: {}'.format(i, prev_dist, next_dist))
+            # print('i: {} x: {} y: {} z: {}   v: x: {} y: {} z: {}'.format(
+            #     i,
+            #     self.base_waypoints.waypoints[i].pose.pose.position.x,
+            #     self.base_waypoints.waypoints[i].pose.pose.position.y,
+            #     self.base_waypoints.waypoints[i].pose.pose.position.z,
+            #     self.base_waypoints.waypoints[i].twist.twist.linear.x,
+            #     self.base_waypoints.waypoints[i].twist.twist.linear.y,
+            #     self.base_waypoints.waypoints[i].twist.twist.linear.z,
+            # ))
+            if next_dist > prev_dist:
+                break
+            self.current_waypoints_index = i
+            prev_dist = next_dist
+
+        final_waypoints = Lane()
+        final_waypoints.header.frame_id = '/world'
+        final_waypoints.header.stamp = rospy.Time(0)
+        final_waypoints_end_index = min(self.current_waypoints_index + LOOKAHEAD_WPS + 1, len(self.base_waypoints.waypoints))
+        final_waypoints.waypoints = self.base_waypoints.waypoints[self.current_waypoints_index + 2:final_waypoints_end_index]
+
+        # for wp in final_waypoints.waypoints:
+        #     wp.twist.twist.linear.x = 10
+
+        # wp_pos = final_waypoints.waypoints[0].pose.pose.position
+        # print('i: {} x: {} y: {} z: {} - wp: x: {} y: {} z: {}   v: x: {} y: {} z: {}'.format(
+        #     self.current_waypoints_index,
+        #     car_pos.x,
+        #     car_pos.y,
+        #     car_pos.z,
+        #     wp_pos.x,
+        #     wp_pos.y,
+        #     wp_pos.z,
+        #     final_waypoints.waypoints[0].twist.twist.linear.x,
+        #     final_waypoints.waypoints[0].twist.twist.linear.y,
+        #     final_waypoints.waypoints[0].twist.twist.linear.z,
+        # ))
+        #
+        # print ('---------------------------------')
+        # print (msg)
+        # print (final_waypoints.waypoints[0])
+
+        self.final_waypoints_pub.publish(final_waypoints)
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
-        pass
+        # possibly we need to handle situation of waypoints chaning
+        # and reset self.current_waypoints_index to 0 in this case
+        # here
+        self.base_waypoints = waypoints
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
@@ -62,11 +137,22 @@ class WaypointUpdater(object):
     def set_waypoint_velocity(self, waypoints, waypoint, velocity):
         waypoints[waypoint].twist.twist.linear.x = velocity
 
-    def distance(self, waypoints, wp1, wp2):
+    def distance_along_waypoints(self, waypoints, wp1, wp2):
+        """
+        Calculate distance between two waypoints
+
+        Args:
+            waypoints (array of waypoits):
+            wp1 (int): index of start waypoints
+            wp2 (int): index of end waypoint
+
+        Returns:
+            float: distance along waypoints
+        """
         dist = 0
-        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+        # dl = lambda a, b:
         for i in range(wp1, wp2+1):
-            dist += dl(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
+            dist += dist(waypoints[wp1].pose.pose.position, waypoints[i].pose.pose.position)
             wp1 = i
         return dist
 
