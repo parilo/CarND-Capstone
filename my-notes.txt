@@ -1,0 +1,40 @@
+/home/andrew/Data/Development/udacity/Self-Driving Car Nanodegree 2016/term 3/lesson 25 - final-project
+
+    /CarND-Capstone/ros/src/tl_detector/light_classification
+
+In container:
+
+    $ source /opt/ros/kinetic/setup.bash  (pick up opencv)
+    $ source /home/ros/project/ros/devel/setup.bash (pick up ROS)
+
+    (Don't forget to source ROS and our project???)
+
+    $ cd /home/ros/project          (root of project area)
+
+        /tl-photos                  (traffic light photos)
+
+        /ros/src/tl_detector/light_classification   (my stuff)
+
+=== Docker Cheats ===
+
+docker image ls
+docker start udacity-carnd-ros
+docker container ls
+docker stop udacity-carnd-ros
+docker exec -it udacity-carnd-ros bash
+
+=== Git Cheats ===
+
+git pull                  (pull all changes for current branch)
+git branch <name>         (create a new branch of <name>)
+git branch                (list all branches and which is current)
+git checkout <name>       (change branch to <name>)
+git add .                 (add all ?changed/new files? to branch)
+git commit                (commit changes to branch)
+git log                   (show log of current branch)
+git push origin <name>    (push up changes to branch <name> to repo)
+
+=== My Branches ===
+
+andrew-0001 (PR) - traffic light images and initial implementation of test harness
+andrew-0001 (L) - new local branch for working on my stuff
