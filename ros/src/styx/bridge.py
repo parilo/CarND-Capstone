@@ -183,10 +183,13 @@ class Bridge(object):
         self.publishers['image'].publish(image_message)
 
     def callback_steering(self, data):
-        self.server('steer', data={'steering_angle': str(data.steering_wheel_angle_cmd)})
+        if hasattr(self, 'server'):
+            self.server('steer', data={'steering_angle': str(data.steering_wheel_angle_cmd)})
 
     def callback_throttle(self, data):
-        self.server('throttle', data={'throttle': str(data.pedal_cmd)})
+        if hasattr(self, 'server'):
+            self.server('throttle', data={'throttle': str(data.pedal_cmd)})
 
     def callback_brake(self, data):
-        self.server('brake', data={'brake': str(data.pedal_cmd)})
+        if hasattr(self, 'server'):
+            self.server('brake', data={'brake': str(data.pedal_cmd)})
