@@ -19,6 +19,7 @@ class TLClassifier(object):
 
         """
         #TODO implement light color prediction
+        #return image
         return TrafficLight.UNKNOWN
 
     def get_test_classification(self, image):
