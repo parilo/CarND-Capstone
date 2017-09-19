@@ -136,7 +136,6 @@ class TLDetector(object):
         image_width = self.config['camera_info']['image_width']
         image_height = self.config['camera_info']['image_height']
 
-
         # get transform between pose of camera and world frame
         trans = None
         try:
@@ -180,11 +179,15 @@ class TLDetector(object):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
         Returns:
-            int: index of waypoint closes to the upcoming traffic light (-1 if none exists)
+            int: index of waypoint closes to the upcoming stop line for a traffic light (-1 if none exists)
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
         """
         light = None
         light_positions = self.config['light_positions']
+
+        # List of positions that correspond to the line to stop in front of for a given intersection
+        # stop_line_positions = self.config['stop_line_positions']
+
         if(self.pose):
             car_position = self.get_closest_waypoint(self.pose.pose)
 
