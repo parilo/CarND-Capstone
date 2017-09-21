@@ -11,8 +11,10 @@ class TestHarness():
 
 if __name__ == '__main__':
     test = TestHarness()
-    npimage = cv2.imread('./images/red-cg-01.jpg')
-    #npimage = cv2.imread('./images/yel-cg-01.jpg')
-    #npimage = cv2.imread('./images/grn-cg-01.jpg') # not working?
-    #matimage = cv2.fromarray(npimage) <-- does not work
+    #color = 'red'
+    #color = 'yel'
+    color = 'grn'
+    npimage = cv2.imread('./images/' + color + '-cg-01.jpg')
+
+    print 'Testing for:', color
     print test.get_light_state(npimage)
