@@ -248,7 +248,7 @@ class TLDetector(object):
             pose (Pose): position to match a waypoint to
 
         Returns:
-            int: Distance of the closest traffic light to the current vehicle position
+            Double: Distance of the closest traffic light to the current vehicle position
 
         """
         traffic_light_positions = self.config['light_positions']
