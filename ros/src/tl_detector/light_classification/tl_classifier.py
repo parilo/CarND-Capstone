@@ -34,72 +34,101 @@ class TLClassifier(object):
         """
         #TODO implement light color prediction
         img = np.asarray(image) # convert cv::Mat image to numpy array
-        #print img.shape
-        #print img.size
-        #print img.dtype
 
-        # http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_colorspaces/py_colorspaces.html
+        # See: http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_colorspaces/py_colorspaces.html
+        #
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+        # Define the upper and lower boundaries for HSV
+        # values which define a masking range for the
+        # color of interest
+
+        # For red
         low_red = np.array([175, 30, 8])
         upp_red = np.array([179, 255, 255])
 
+        # For yellow
         low_yel = np.array([20, 160, 0])
         upp_yel = np.array([30, 255, 255])
 
+        # For green
         low_grn = np.array([50, 179, 102])
         upp_grn = np.array([75, 255, 255])
 
-        colors = ["red", "yellow", "green"]
+        # Define the region-of-interest (roi) upper-left
+        # corner coordinates (y, x); the full roi will be
+        # calculated as (y:y+65, x:x+45)
+        #
+        roi_red = np.array([20, 20])
+        roi_yel = np.array([98, 20])
+        roi_grn = np.array([175, 20])
 
+        # Build convenience array for masking infomation
+        #
         masks = np.array([
-            [low_red, upp_red],
-            [low_yel, upp_yel],
-            [low_grn, upp_grn]
+            [low_red, upp_red, roi_red],
+            [low_yel, upp_yel, roi_yel],
+            [low_grn, upp_grn, roi_grn]
         ])
 
+        # Zero out ratios for later comparison
+        #
         ratios = np.array([0.0, 0.0, 0.0])
 
-        for i, cmask in enumerate(masks):
-            mask = cv2.inRange(hsv, cmask[0], cmask[1])
-            res = cv2.bitwise_and(img, img, mask=mask)
+        # Iterate thru each of the masks...
+        #
+        for i, mask in enumerate(masks):
 
-            # num of pixels in mask / image size
+            # Get upper-left corner of the region-of-interest for the mask
             #
-            # image size is divided by 3.0 twice:
+            y = mask[2][0]
+            x = mask[2][1]
+
+            # Grab the region-of-interest of the image and HSV mask
             #
-            #   1. First, because size is # pixels * # planes,
-            #      we just want the number on a single plane
+            img_roi = img[y:y+65, x:x+45]
+            hsv_roi = hsv[y:y+65, x:x+45]
+
+            # Get the set of pixels found in the HSV range
             #
-            #   2. Second, because we want to know how much
-            #      area is taken up in the 1/3 of the space a
-            #      single "light" occupies
+            hsv_set = cv2.inRange(hsv_roi, mask[0], mask[1])
+
+            # Calculate the percentage ratio of found (masked)
+            # pixels to the total region-of-interest (roi) pixels
             #
-            ratio = (cv2.countNonZero(mask) / ((img.size / 3.0) / 3.0))
+            #             num of pixels in mask
+            # ratio = ------------------------------
+            #         # of roi pixels (single plane)
+            #
+            ratio = (cv2.countNonZero(hsv_set) / (img_roi.size / 3.0))
 
-            color = colors[i]
+            # Store the ratio for later comparison
+            #
+            ratios[i] = np.round(ratio, 1)
 
-            #print color, 'percentage:', np.round(ratio * 100, 1), '%'
-
-            ratios[i] = np.round(ratio * 100, 1)
-
+            # Uncomment this code if you want to see what was found
+            #res = cv2.bitwise_and(img_roi, img_roi, mask=hsv_range)
+            #color = ["red", "yellow", "green"][i]
             #cv2.imwrite('./images/' + color + '-testing.jpg', res)
+
+        #######################################################################
 
         top = 0.0
         tlv = TrafficLight.UNKNOWN
+        diff = 0.15 # Decimal percentage difference to consider valid
 
-        if ratios[0] > top:
-            top = ratios[0]
-            tlv = TrafficLight.RED
+        # Traffic light color enums
+        colors = np.array([
+            TrafficLight.RED,
+            TrafficLight.YELLOW,
+            TrafficLight.GREEN])
 
-        if ratios[1] > top:
-            top = ratios[1]
-            tlv = TrafficLight.YELLOW
+        # Find the most-likely traffic light color based on
+        # found ratios and ratio differences
+        for i, light in enumerate(colors):
+            if ratios[i] > top and ((ratios[i] - top) / (top + 0.000000001)) > diff:
+                top = ratios[i]
+                tlv = colors[i]
 
-        if ratios[2] > top:
-            top = ratios[2]
-            tlv = TrafficLight.GREEN
-
-        #print tlv, top
-
+        # Return the found traffic light color value
         return tlv
