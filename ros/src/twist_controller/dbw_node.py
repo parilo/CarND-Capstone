@@ -56,7 +56,7 @@ class DBWNode(object):
         self.controller = Controller(
             wheel_base,
             steer_ratio,
-            1.0, #  min speed
+            5.0, #  min speed
             max_lat_accel,
             max_steer_angle,
             decel_limit,
