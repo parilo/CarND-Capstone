@@ -14,7 +14,13 @@ if __name__ == '__main__':
     #color = 'red'
     color = 'yel'
     #color = 'grn'
-    npimage = cv2.imread('./images/' + color + '-cg-01.jpg')
+
+    npimage = cv2.imread('./images/' + color + '/01.jpg')
 
     print 'Testing for:', color
-    print 'Found:', test.get_light_state(npimage)
+
+    found = test.get_light_state(npimage)
+
+    colors = ["red", "yel", "grn"]
+
+    print 'Found:', colors[found]

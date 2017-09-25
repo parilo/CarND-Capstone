@@ -43,17 +43,21 @@ class TLClassifier(object):
         # values which define a masking range for the
         # color of interest
 
-        # For red
-        low_red = np.array([175, 30, 8])
-        upp_red = np.array([179, 255, 255])
+        # For red (lower band)
+        low_red0 = np.array([0, 100, 100])
+        upp_red0 = np.array([12, 255, 255])
+
+        # For red (upper band)
+        low_red1 = np.array([167, 100, 100])
+        upp_red1 = np.array([179, 255, 255])
 
         # For yellow
-        low_yel = np.array([20, 160, 0])
-        upp_yel = np.array([30, 255, 255])
+        low_yel = np.array([10, 0, 100])
+        upp_yel = np.array([32, 255, 255])
 
         # For green
-        low_grn = np.array([50, 179, 102])
-        upp_grn = np.array([75, 255, 255])
+        low_grn = np.array([35, 80, 80])
+        upp_grn = np.array([90, 255, 255])
 
         # Define the region-of-interest (roi) upper-left
         # corner coordinates (y, x); the full roi will be
@@ -66,14 +70,15 @@ class TLClassifier(object):
         # Build convenience array for masking infomation
         #
         masks = np.array([
-            [low_red, upp_red, roi_red],
+            [low_red0, upp_red0, roi_red],
+            [low_red1, upp_red1, roi_red],
             [low_yel, upp_yel, roi_yel],
             [low_grn, upp_grn, roi_grn]
         ])
 
         # Zero out ratios for later comparison
         #
-        ratios = np.array([0.0, 0.0, 0.0])
+        ratios = np.array([0.0, 0.0, 0.0, 0.0])
 
         # Iterate thru each of the masks...
         #
@@ -107,18 +112,20 @@ class TLClassifier(object):
             ratios[i] = np.round(ratio, 1)
 
             # Uncomment this code if you want to see what was found
-            #res = cv2.bitwise_and(img_roi, img_roi, mask=hsv_range)
-            #color = ["red", "yellow", "green"][i]
-            #cv2.imwrite('./images/' + color + '-testing.jpg', res)
+            res = cv2.bitwise_and(img_roi, img_roi, mask=hsv_set)
+            color = ["red0", "red1", "yellow", "green"][i]
+            cv2.imwrite('./images/' + color + '-testing-roi.jpg', img_roi)
+            cv2.imwrite('./images/' + color + '-testing-res.jpg', res)
 
         #######################################################################
 
         top = 0.0
-        tlv = TrafficLight.UNKNOWN
+        tlv = TrafficLight.YELLOW
         diff = 0.15 # Decimal percentage difference to consider valid
 
         # Traffic light color enums
         colors = np.array([
+            TrafficLight.RED,
             TrafficLight.RED,
             TrafficLight.YELLOW,
             TrafficLight.GREEN])
