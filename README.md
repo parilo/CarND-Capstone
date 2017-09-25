@@ -25,12 +25,12 @@ If you have Nvidia GPU install Nvidia-Docker from [here](https://github.com/NVID
 
  # Run and enter the docker container
  # run GPU version of the container
- nvidia-docker run -dit --name udacity-carnd-ros -v "$(pwd)":/home/ros/project --user "$(id -u)" -p 4567:4567 parilo/udacity-carnd-ros-gpu:ver1 bash
+ nvidia-docker run -dit --name udacity-carnd-ros -v "$(pwd)":/home/ros/project --user "$(id -u)" -p 4567:4567 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix parilo/udacity-carnd-ros-gpu:ver1 bash
  # enter the container
  nvidia-docker exec -it udacity-carnd-ros bash
 
  # run none-GPU version
- docker run -dit --name udacity-carnd-ros -v "$(pwd)":/home/ros/project --user "$(id -u)" -p 4567:4567 parilo/udacity-carnd-ros-nogpu:ver1 bash
+ docker run -dit --name udacity-carnd-ros -v "$(pwd)":/home/ros/project --user "$(id -u)" -p 4567:4567 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix parilo/udacity-carnd-ros-nogpu:ver1 bash
  # enter the container
  docker exec -it udacity-carnd-ros bash
 
