@@ -37,17 +37,17 @@ class WaypointUpdater(object):
     def __init__(self):
         rospy.init_node('waypoint_updater')
 
-        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1)
-        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb, queue_size=1)
-
-        # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
-
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
         self.base_waypoints = None
         self.current_waypoints_index = 0
+
+        rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1)
+        rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb, queue_size=1)
+
+        # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
 
         rospy.spin()
 
@@ -59,6 +59,8 @@ class WaypointUpdater(object):
         # from current position onwards.
 
         # return if we at the end of the path
+        if self.base_waypoints is None:
+            return
         if self.current_waypoints_index == len(self.base_waypoints.waypoints) - 1:
             return
 

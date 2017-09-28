@@ -13,6 +13,7 @@ from styx_msgs.msg import Lane
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from light_classification.tl_classifier import TLClassifier
+from tl_ssd_detector.tl_ssd_detector import TLSSDDetector
 #   from traffic_light_config import config
 
 # Our Team!
@@ -37,6 +38,22 @@ class TLDetector(object):
         self.waypoints = None
         self.camera_image = None
         self.lights = []
+        self.DEBUG = True
+
+        config_string = rospy.get_param("/traffic_light_config")
+        self.config = yaml.load(config_string)
+
+        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+
+        self.bridge = CvBridge()
+        self.tl_detector = TLSSDDetector()
+        self.light_classifier = TLClassifier()
+        self.listener = tf.TransformListener()
+
+        self.state = TrafficLight.UNKNOWN
+        self.last_state = TrafficLight.UNKNOWN
+        self.last_wp = -1
+        self.state_count = 0
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -50,22 +67,10 @@ class TLDetector(object):
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
         sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
+        sub7 = rospy.Subscriber('/image_raw', Image, self.image_cb)
 
-        config_string = rospy.get_param("/traffic_light_config")
-        self.config = yaml.load(config_string)
+        self.image_bboxes_pub = rospy.Publisher("/image_bboxes", Image, queue_size=1)
 
-        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
-
-        self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
-        self.listener = tf.TransformListener()
-
-        self.state = TrafficLight.UNKNOWN
-        self.last_state = TrafficLight.UNKNOWN
-        self.last_wp = -1
-        self.state_count = 0
-
-        self.DEBUG = True
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -86,6 +91,12 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
+
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+        print(cv_image.shape)
+        self.tl_detector.draw_bboxes(cv_image)
+        self.image_bboxes_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "rgb8"))
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -217,7 +228,6 @@ class TLDetector(object):
         if not self.has_image:
             self.prev_light_loc = None
             return False
-
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
