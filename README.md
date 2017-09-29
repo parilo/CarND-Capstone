@@ -22,7 +22,11 @@ If you have Nvidia GPU install Nvidia-Docker from [here](https://github.com/NVID
  # clone this repository
  git clone https://github.com/parilo/CarND-Capstone.git
  cd CarND-Capstone
-
+ # download
+ # http://parilo.ru/ssd/model.ckpt-226812.data-00000-of-00001
+ # into 
+ # ros/src/tl_detector/tl_ssd_detector/checkpoint/
+ 
  # Run and enter the docker container
  # run GPU version of the container
  nvidia-docker run -dit --name udacity-carnd-ros -v "$(pwd)":/home/ros/project --user "$(id -u)" -p 4567:4567 -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix parilo/udacity-carnd-ros-gpu:ver1 bash
