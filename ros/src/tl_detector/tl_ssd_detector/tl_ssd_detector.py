@@ -76,15 +76,32 @@ class TLSSDDetector(object):
         rbboxes = np_methods.bboxes_resize(rbbox_img, rbboxes)
         return rclasses, rscores, rbboxes
 
-    def draw_bboxes(self, img, select_threshold=0.5, nms_threshold=.45):
+    def get_strongest_bbox(self, img, select_threshold=0.5, nms_threshold=.45):
+
         classes, scores, bboxes = self.process_image(img, select_threshold, nms_threshold)
-        colors = {}
-        colors[1] = (
-            0,
-            255,
-            255
-        )
-        visualization.bboxes_draw_on_img(img, classes, scores, bboxes, colors)
+        # do nothing if we have not detected bboxes
+        if len(classes) == 0:
+            return None
+
+        if len(scores) > 1:
+            bbox_infos = zip(classes, scores, bboxes)
+            # print('--- got bboxes')
+            # print(bbox_infos)
+            bbox_infos = sorted(bbox_infos, key=lambda info: info[1])
+            strongest_bbox = bbox_infos[-1]
+            classes = [strongest_bbox[0]]
+            scores = [strongest_bbox[1]]
+            bboxes = np.array(strongest_bbox[2]).reshape((1, -1))
+
+        # colors = {}
+        # colors[1] = (
+        #     0,
+        #     255,
+        #     255
+        # )
+        # visualization.bboxes_draw_on_img(img, classes, scores, bboxes, colors)
+
+        return bboxes.reshape((-1)).tolist()
 
     # # Test on some demo image and visualize output.
     # # path = '../test/bosch-train/'
