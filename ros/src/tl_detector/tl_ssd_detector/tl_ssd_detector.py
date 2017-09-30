@@ -49,7 +49,6 @@ class TLSSDDetector(object):
 
         # Restore SSD model.
         ckpt_filename = 'tl_ssd_detector/checkpoint/model.ckpt-226812'
-        # ckpt_filename = '../checkpoints/VGG_VOC0712_SSD_300x300_ft_iter_120000.ckpt'
         self.isess = tf.Session(config=config)
         self.isess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()

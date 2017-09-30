@@ -27,7 +27,7 @@ team = \
         ================================================
     """
 
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 2
 
 
 class TLDetector(object):
@@ -43,7 +43,8 @@ class TLDetector(object):
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
 
-        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+        self.upcoming_traffic_light_wp_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+        self.upcoming_traffic_light_state_pub = rospy.Publisher('/traffic_state', Int32, queue_size=1)
 
         self.bridge = CvBridge()
         self.tl_detector = TLSSDDetector()
@@ -107,6 +108,8 @@ class TLDetector(object):
         used.
         '''
 
+        self.upcoming_traffic_light_wp_pub.publish(Int32(light_wp))
+
         # print('--- tl: {} {}'.format(state, light_wp))
 
         if self.state != state:
@@ -117,12 +120,14 @@ class TLDetector(object):
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
             # print('--- light_wp: {}'.format(light_wp))
-            print('--- tl: {} {}'.format(state, light_wp))
-            self.upcoming_red_light_pub.publish(Int32(light_wp))
+            # print('--- tl: {} {}'.format(state, light_wp))
+            # self.upcoming_red_light_pub.publish(Int32(light_wp))
+            self.upcoming_traffic_light_state_pub.publish(Int32(self.state))
         else:
             # print('--- last_wp: {}'.format(self.last_wp))
-            print('--- tl: {} {} {}'.format(state, light_wp, self.last_wp))
-            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+            # print('--- tl: {} {} {}'.format(state, light_wp, self.last_wp))
+            # self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+            self.upcoming_traffic_light_state_pub.publish(Int32(self.last_state))
         self.state_count += 1
 
     def euclidean_distance(self, x1, y1, x2, y2):
@@ -324,12 +329,12 @@ class TLDetector(object):
             # rospy.loginfo("Current vehicle way point: {}".format(car_position))
             # rospy.loginfo("Closest traffic light way point distance: {}".format(closest_light_dist))
 
-            if closest_light_dist < 50:
+            if closest_light_dist < 150:
                 # rospy.loginfo("Traffic Light Detected!")
                 # light = self.waypoints.waypoints[closest_light_idx]
                 state = self.get_light_state()
-                if state == TrafficLight.RED:
-                    stop_line_wp_index = self.get_closest_waypoint_to_coords(light_wp)
+                # if state == TrafficLight.RED:
+                stop_line_wp_index = self.get_closest_waypoint_to_coords(light_wp)
 
         # self.waypoints = None
         return stop_line_wp_index, state
