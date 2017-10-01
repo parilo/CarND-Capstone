@@ -1,3 +1,6 @@
+[![Udacity CarND Capstone project](http://img.youtube.com/vi/BEYpU2B77bE/0.jpg)](https://www.youtube.com/watch?v=BEYpU2B77bE)
+
+
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. The goal is drive a car in simulator and in real world test ground. Car must be able to drive through pre recorded track and stop on red traffic lights. For Traffic lights detection existing [SSD](https://github.com/parilo/SSD-Tensorflow) was trained on [Bosch small traffic lights dataset](https://hci.iwr.uni-heidelberg.de/node/6132). For classification simple [CNN](https://github.com/parilo/traffic-light-classifier) was trained on [handcrafted dataset](https://github.com/jorcus/CarND-Capstone-Dataset). For car controlling was used simple PID.
 
 ## Team
