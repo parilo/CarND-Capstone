@@ -3,9 +3,13 @@ This is the project repo for the final project of the Udacity Self-Driving Car N
 ## Team
 
 Anton Pechenko	forpost78@gmail.com
+
 Kai Detlefsen	kai.detlefsen@gmx.de
+
 Andrew Ayers	keeper63@cox.net
+
 Muddassir Ahmed Khan	muddassir.ahmed235@gmail.com
+
 Ng Fang Kiang	kiang.ng@hotmail.com
 
 ## Installation
