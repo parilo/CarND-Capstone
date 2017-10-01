@@ -1,4 +1,12 @@
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. The goal is drive a car in simulator and in real world test ground. Car must be able to drive through pre recorded track and stop on red traffic lights. For Traffic lights detection existing [SSD](https://github.com/parilo/SSD-Tensorflow) was trained on [Bosch small traffic lights dataset](https://hci.iwr.uni-heidelberg.de/node/6132). For classification simple [CNN](https://github.com/parilo/traffic-light-classifier) was trained on [handcrafted dataset](https://github.com/jorcus/CarND-Capstone-Dataset). For car controlling was used simple PID.
+
+## Team
+
+Anton Pechenko	forpost78@gmail.com
+Kai Detlefsen	kai.detlefsen@gmx.de
+Andrew Ayers	keeper63@cox.net
+Muddassir Ahmed Khan	muddassir.ahmed235@gmail.com
+Ng Fang Kiang	kiang.ng@hotmail.com
 
 ## Installation
 
