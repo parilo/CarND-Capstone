@@ -4,6 +4,8 @@
 #
 # Implementation of SSD and this code is taken from
 # https://github.com/balancap/SSD-Tensorflow
+# and trained on Bosch small traffic light dataset
+# https://hci.iwr.uni-heidelberg.de/node/6132
 #
 
 import os

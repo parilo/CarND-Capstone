@@ -24,8 +24,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-# MAX_VELOCITY = 5.0
-MANUVERS_ACCEL = 1.0
+MANUVERS_ACCEL = 1.0 # maximum acceleration during aceeleration and deceleration manuvers
 LAG_STEPS = 2 # number of teps which passes during calculations
 
 def dist(a, b):
@@ -117,23 +116,6 @@ class WaypointUpdater(object):
 
         self.plan_accel (final_waypoints)
         self.plan_slow_down (final_waypoints)
-        # print('--- path')
-        # for i in range(min(10, len(final_waypoints.waypoints))):
-        #     print('   wp vel: {}'.format(self.get_waypoint_velocity(final_waypoints.waypoints[i])))
-        # print('... {}'.format(len(final_waypoints.waypoints)))
-        # for i in range(min(10, len(final_waypoints.waypoints))):
-        #     print('   wp vel: {}'.format(self.get_waypoint_velocity(final_waypoints.waypoints[len(final_waypoints.waypoints) - i -1])))
-
-
-        # print('--- wp: {} {} {}'.format(self.current_waypoints_index, self.stop_waypoint_index, waypoints_to_publish))
-        # if waypoints_to_publish < 10:
-        #     for i in range(len(final_waypoints.waypoints)):
-        #         # wp_velocity = self.current_velocity * float(waypoints_to_publish - i - 1) / float(waypoints_to_publish)
-        #         # print('        wp vel stop: {}'.format(wp_velocity))
-        #         self.set_waypoint_velocity(final_waypoints.waypoints, i, 0)
-        # else:
-        #     for i in range(len(final_waypoints.waypoints)):
-        #         self.set_waypoint_velocity(final_waypoints.waypoints, i, 10)
 
         self.final_waypoints_pub.publish(final_waypoints)
 
@@ -144,9 +126,6 @@ class WaypointUpdater(object):
         self.base_waypoints = waypoints
         self.base_waypoints_sub.unregister()
         self.set_stop_waypoint_to_last()
-        # setting default velocity for every waypoint
-        # for i in range(len(self.base_waypoints.waypoints)):
-        #     self.set_waypoint_velocity(self.base_waypoints.waypoints, i, 10)
 
     def traffic_cb(self, msg):
         # receiving waypoint index of traffic light stop line
@@ -158,6 +137,7 @@ class WaypointUpdater(object):
         pass
 
     def traffic_state_cb(self, msg):
+        # receiving traffic light state
         self.traffic_light_state = msg.data
 
     def obstacle_cb(self, msg):
@@ -167,36 +147,45 @@ class WaypointUpdater(object):
         self.current_velocity = msg.twist.linear.x
 
     def plan_accel(self, waypoints):
+        '''
+            Plan velocities of begining waypoints to make acceleration
+            up to self.max_velocity
+
+            Args:
+                waypoints (styx_msgs/Lane): waypoints will be midified in place
+        '''
         wp_count = len(waypoints.waypoints)
         if wp_count == 0:
             return
 
         dv = math.fabs(float(self.max_velocity - self.current_velocity))
-        # initialize with max velocity on every waypoint
-        # for i in range(len(waypoints.waypoints)):
-        #     self.set_waypoint_velocity(waypoints.waypoints, i, MAX_VELOCITY)
-        # if dv > 0.5:
-            # assume uniform distribution of waypoints along path
 
         if wp_count < 2:
             return
+
         wp_length = self.distance_along_waypoints(waypoints.waypoints, 0, wp_count - 1)
         accel_time = dv / MANUVERS_ACCEL
         accel_length = self.current_velocity * accel_time + MANUVERS_ACCEL * accel_time * accel_time * 0.5
         accel_count = int(float(wp_count) * accel_length / wp_length)
-        # if accel_count > LAG_STEPS:
+
         if accel_count != 0:
             time_for_step = accel_time / accel_count
         else:
             time_for_step = 0
         v = self.current_velocity
         v += LAG_STEPS * MANUVERS_ACCEL * time_for_step
-        # for i in range(min(wp_count, accel_count) - LAG_STEPS):
         for i in range(wp_count):
             v += MANUVERS_ACCEL * time_for_step
             self.set_waypoint_velocity(waypoints.waypoints, i, min(v, self.max_velocity))
 
     def plan_slow_down(self, waypoints):
+        '''
+            Plan velocities of ending waypoints to make deceleration
+            to 0 m/s
+
+            Args:
+                waypoints (styx_msgs/Lane): waypoints will be midified in place
+        '''
         wp_count = len(waypoints.waypoints)
         if wp_count == 0:
             return
@@ -207,26 +196,23 @@ class WaypointUpdater(object):
         if wp_count < 2:
             self.set_waypoint_velocity(waypoints.waypoints, 0, 0)
             return
+
         wp_length = self.distance_along_waypoints(waypoints.waypoints, 0, wp_count - 1)
         accel_time = dv / MANUVERS_ACCEL
         accel_length = self.current_velocity * accel_time + MANUVERS_ACCEL * accel_time * accel_time * 0.5
         accel_count = int(float(wp_count) * accel_length / wp_length)
-        # if accel_count > LAG_STEPS:
+
         if accel_count != 0:
             time_for_step = accel_time / accel_count
         else:
             time_for_step = 0
         v = 0.0
-        # v += LAG_STEPS * MANUVERS_ACCEL * time_for_step
-        # for i in range(min(wp_count, accel_count) - LAG_STEPS):
         for i in range(wp_count):
             v += MANUVERS_ACCEL * time_for_step
             wp_index = wp_count - i - 1
             wp_vel = self.get_waypoint_velocity(waypoints.waypoints[wp_index])
             if wp_vel > v:
                 self.set_waypoint_velocity(waypoints.waypoints, wp_index, v)
-        # else:
-        #     self.set_waypoint_velocity(waypoints.waypoints, wp_count - 1, 0)
 
     def set_stop_waypoint_to_last(self):
         self.stop_waypoint_index = len(self.base_waypoints.waypoints) - 1
