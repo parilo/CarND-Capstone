@@ -2,6 +2,11 @@ import tensorflow as tf
 import numpy as np
 
 class TLCNNClassifier(object):
+    '''
+    Classifer was made on base of Term 1 traffic signs clssification project
+    Code is availiable at https://github.com/parilo/traffic-light-classifier
+    Dataset is available at https://github.com/jorcus/CarND-Capstone-Dataset
+    '''
 
     def __init__(self):
 
