@@ -25,8 +25,8 @@ class Controller(object):
         	max_lat_accel,
         	max_steer_angle)
 
-        # self.PID = PID(0.9, 0.0005, 0.075, decel_limit, accel_limit)
-        self.PID = PID(4.0, 0.001, 0.05, decel_limit, accel_limit)
+        self.PID = PID(0.9, 0.0005, 0.075, decel_limit, accel_limit)
+        # self.PID = PID(4.0, 0.001, 0.05, decel_limit, accel_limit)
         self.low_pass_filer_vel = LowPassFilter(10.0, 1.0)
 
         self.lastT = None

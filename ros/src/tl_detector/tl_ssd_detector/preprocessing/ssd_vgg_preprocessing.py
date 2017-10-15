@@ -14,7 +14,7 @@
 # ==============================================================================
 """Pre-processing images for SSD-type networks.
 """
-from enum import Enum, IntEnum
+# from enum import Enum, IntEnum
 import numpy as np
 
 import tensorflow as tf
@@ -28,10 +28,18 @@ from tl_ssd_detector.nets import ssd_common
 slim = tf.contrib.slim
 
 # Resizing strategies.
-Resize = IntEnum('Resize', ('NONE',                # Nothing!
-                            'CENTRAL_CROP',        # Crop (and pad if necessary).
-                            'PAD_AND_RESIZE',      # Pad, and resize to output shape.
-                            'WARP_RESIZE'))        # Warp resize.
+# Resize = IntEnum('Resize', ('NONE',                # Nothing!
+#                             'CENTRAL_CROP',        # Crop (and pad if necessary).
+#                             'PAD_AND_RESIZE',      # Pad, and resize to output shape.
+#                             'WARP_RESIZE'))        # Warp resize.
+class EnumObject(object):
+    pass
+
+Resize = EnumObject()
+Resize.NONE = 1
+Resize.CENTRAL_CROP = 2
+Resize.PAD_AND_RESIZE = 3
+Resize.WARP_RESIZE = 4
 
 # VGG mean parameters.
 _R_MEAN = 123.
