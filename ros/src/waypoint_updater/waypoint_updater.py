@@ -67,10 +67,12 @@ class WaypointUpdater(object):
         # and waypoints don't change, so we cache current waypoint and search
         # from current position onwards.
 
-        # return if we at the end of the path
         if self.base_waypoints is None:
             return
+        # return if we at the end of the path
         if self.current_waypoints_index == len(self.base_waypoints.waypoints) - 1:
+            # reset to begining of the track
+            self.current_waypoints_index = 0
             return
 
         car_pos =  msg.pose.position
@@ -90,17 +92,20 @@ class WaypointUpdater(object):
             self.current_waypoints_index = i
             prev_dist = next_dist
 
-        waypoints_to_stop = self.stop_waypoint_index - self.current_waypoints_index
-        if (
-            (
-                self.traffic_light_state == TrafficLight.GREEN and
-                waypoints_to_stop < 10
-            ) or
-            waypoints_to_stop < 0
-        ):
-            waypoints_to_publish = LOOKAHEAD_WPS
+        if self.stop_waypoint_index != -1:
+            waypoints_to_stop = self.stop_waypoint_index - self.current_waypoints_index
+            if (
+                (
+                    self.traffic_light_state == TrafficLight.GREEN and
+                    waypoints_to_stop < 10
+                ) or
+                waypoints_to_stop < 0
+            ):
+                waypoints_to_publish = LOOKAHEAD_WPS
+            else:
+                waypoints_to_publish = min(LOOKAHEAD_WPS, waypoints_to_stop)
         else:
-            waypoints_to_publish = min(LOOKAHEAD_WPS, waypoints_to_stop)
+            waypoints_to_publish = LOOKAHEAD_WPS
 
         if waypoints_to_publish > 1:
             waypoints_to_publish -= 1
@@ -115,7 +120,9 @@ class WaypointUpdater(object):
         final_waypoints.waypoints = self.base_waypoints.waypoints[self.current_waypoints_index + 2:final_waypoints_end_index]
 
         self.plan_accel (final_waypoints)
-        self.plan_slow_down (final_waypoints)
+        # plan to stop if it is not end of the track
+        if self.stop_waypoint_index != -1:
+            self.plan_slow_down (final_waypoints)
 
         self.final_waypoints_pub.publish(final_waypoints)
 
@@ -125,13 +132,13 @@ class WaypointUpdater(object):
         # here
         self.base_waypoints = waypoints
         self.base_waypoints_sub.unregister()
-        self.set_stop_waypoint_to_last()
+        self.stop_waypoint_index = -1
 
     def traffic_cb(self, msg):
         # receiving waypoint index of traffic light stop line
         # or -1 otherwise
         if msg.data == -1:
-            self.set_stop_waypoint_to_last()
+            self.stop_waypoint_index = -1
         else:
             self.stop_waypoint_index = msg.data
         pass
@@ -213,9 +220,6 @@ class WaypointUpdater(object):
             wp_vel = self.get_waypoint_velocity(waypoints.waypoints[wp_index])
             if wp_vel > v:
                 self.set_waypoint_velocity(waypoints.waypoints, wp_index, v)
-
-    def set_stop_waypoint_to_last(self):
-        self.stop_waypoint_index = len(self.base_waypoints.waypoints) - 1
 
     def get_waypoint_velocity(self, waypoint):
         return waypoint.twist.twist.linear.x
