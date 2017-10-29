@@ -24,7 +24,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-MANUVERS_ACCEL = 1.0 # maximum acceleration during aceeleration and deceleration manuvers
+MANUVERS_ACCEL = 2 # maximum acceleration during aceeleration and deceleration manuvers
 LAG_STEPS = 2 # number of teps which passes during calculations
 
 def dist(a, b):
@@ -110,7 +110,7 @@ class WaypointUpdater(object):
         if waypoints_to_publish > 1:
             waypoints_to_publish -= 1
 
-        # print('--- index: {} {} {} {}'.format(self.current_waypoints_index, self.stop_waypoint_index, waypoints_to_stop, waypoints_to_publish))
+        # print('--- index: {} {} {} {} {}'.format(self.current_waypoints_index, self.stop_waypoint_index, waypoints_to_stop, waypoints_to_publish, self.traffic_light_state))
 
         # get next LOOKAHEAD_WPS waypoints from current waypoint
         final_waypoints = Lane()
@@ -123,6 +123,10 @@ class WaypointUpdater(object):
         # plan to stop if it is not end of the track
         if self.stop_waypoint_index != -1:
             self.plan_slow_down (final_waypoints)
+
+        # print('---new-plan------------------------------------------------')
+        # for wp in final_waypoints.waypoints:
+        #     print(wp.twist.twist.linear.x)
 
         self.final_waypoints_pub.publish(final_waypoints)
 

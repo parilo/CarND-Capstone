@@ -60,7 +60,10 @@ class DBWNode(object):
             max_lat_accel,
             max_steer_angle,
             decel_limit,
-            accel_limit)
+            accel_limit,
+            wheel_radius,
+            vehicle_mass
+            )
 
         rospy.Subscriber('/current_velocity', TwistStamped, self.velocity_cb, queue_size=1)
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cmd_cb, queue_size=1)

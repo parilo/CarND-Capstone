@@ -16,8 +16,12 @@ class Controller(object):
         	max_lat_accel,
         	max_steer_angle,
             decel_limit,
-            accel_limit):
-        # TODO: Implement
+            accel_limit,
+            wheel_radius,
+            vehicle_mass
+        ):
+        self.wheel_radius = wheel_radius
+        self.vehicle_mass = vehicle_mass
         self.YawController = YawController(
         	wheel_base,
         	steer_ratio,
@@ -25,8 +29,9 @@ class Controller(object):
         	max_lat_accel,
         	max_steer_angle)
 
-        self.PID = PID(0.9, 0.0005, 0.075, decel_limit, accel_limit)
+        # self.PID = PID(0.9, 0.0005, 0.075, decel_limit, accel_limit)
         # self.PID = PID(4.0, 0.001, 0.05, decel_limit, accel_limit)
+        self.PID = PID(1.0, 0.0, 0.001, decel_limit, accel_limit)
         self.low_pass_filer_vel = LowPassFilter(10.0, 1.0)
 
         self.lastT = None
@@ -49,12 +54,12 @@ class Controller(object):
     	self.lastT = T
     	a = self.PID.step(velocity_error,dt)
      	if a > 0.0:
-    		throttle, brake = a, 0.0
+    		throttle, brake = min(a, 1.0), 0.0
     	else:
-    		throttle, brake = 0.0, math.fabs(a)
+    		throttle, brake = 0.0, self.wheel_radius * self.vehicle_mass * math.fabs(a)
 
         steer = self.YawController.get_steering(linear_velocity, angular_velocity, current_velocity)
 
-        # print('--- pid: {} {}'.format(velocity_error, a))
+        print('--- pid: {} {} {}'.format(velocity_error, throttle, brake))
 
         return throttle, brake, steer
